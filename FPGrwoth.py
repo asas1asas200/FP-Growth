@@ -1,7 +1,7 @@
 from collections import Counter
 
 
-class FPBase:
+class FPGrowth:
 	class Node:
 		def __init__(self, value=0, parent=None, name=None):
 			self.childs = {}
@@ -14,14 +14,14 @@ class FPBase:
 			self.cnt = cnt
 			self.nodes = []
 
-	def __init__(self, filename, frequency):
-		self.frequency = frequency
-		self.data = self.__init_data(filename)
+	def __init__(self, freq, filename=None, data_lists=None):
+		self.freq = freq
+		self.data = data_lists if filename is None else self.__read_data(filename)
 		self.table = self.__create_header_table()
 		self.data = self.__sort_filter_data()
 		self.__create_FP_tree()
 		
-	def __init_data(self, filename):
+	def __read_data(self, filename):
 		with open(filename, 'r') as file:
 			data = [i.split() for i in file]					# for string data type
 #			data = [list(map(int, i.split())) for i in file]	# for only numeric data type
@@ -36,7 +36,7 @@ class FPBase:
 			return cnt.most_common()
 
 		total_counts = calc_counts()
-		return {name: self.TableItem(cnt) for name, cnt in total_counts if cnt >= self.frequency}
+		return {name: self.TableItem(cnt) for name, cnt in total_counts if cnt >= self.freq}
 
 	def __sort_filter_data(self):
 		ret = []
@@ -60,10 +60,5 @@ class FPBase:
 		for items in self.data:
 			travel(items)
 
-
-class FP(FPBase):
-	def __init__(self, filename, frequency):
-		super().__init__(filename, frequency)
-
 if __name__ == '__main__':
-	FP('mushroom.dat', 824)
+	pass
