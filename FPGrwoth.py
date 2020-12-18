@@ -4,7 +4,7 @@ from collections import Counter
 class FPBase:
 	class Node:
 		def __init__(self, value=0, parent=None, name=None):
-			self.childs = []
+			self.childs = {}
 			self.parent = parent
 			self.value = value
 			self.name = name
@@ -45,22 +45,17 @@ class FPBase:
 		return ret
 
 	def __create_FP_tree(self):
-		def find_node(childs, target):
-			for i in childs:
-				if i.name == target:
-					return i
-			return None
-
 		def travel(items):
 			now_node = self.root
 			for i in items:
-				next_node = find_node(now_node.childs, i)
+				next_node = None if i not in now_node.childs else now_node.childs[i]
 				if next_node is None:
 					next_node = self.Node(parent=now_node, name=i)
 					self.table[i].nodes.append(next_node)
-					now_node.childs.append(next_node)
+					now_node.childs[i] = next_node
 				next_node.value += 1
 				now_node = next_node
+
 		self.root = self.Node()
 		for items in self.data:
 			travel(items)
