@@ -61,7 +61,6 @@ class FPGrowth:
 			ret = {}
 			for i in self.data.items():
 				addon = tuple(sorted(filter(lambda x: x in self.table, sorted(i[0])), key=lambda y: self.table[y].cnt, reverse=True))
-#				addon = frozenset({j for j in i[0] if j in self.table})
 				if addon in ret:
 					ret[addon] += i[1]
 				else:
