@@ -1,4 +1,5 @@
 from collections import Counter
+from time import time
 
 
 class FPGrowth:
@@ -59,7 +60,8 @@ class FPGrowth:
 		else:
 			ret = {}
 			for i in self.data.items():
-				addon = frozenset({j for j in i[0] if j in self.table})
+				addon = tuple(sorted(filter(lambda x: x in self.table, sorted(i[0])), key=lambda y: self.table[y].cnt, reverse=True))
+#				addon = frozenset({j for j in i[0] if j in self.table})
 				if addon in ret:
 					ret[addon] += i[1]
 				else:
@@ -127,9 +129,12 @@ class FPGrowth:
 				cond_tree.mine_tree(new_freq_sets, freq_sets)
 
 if __name__ == '__main__':
-	FP = FPGrowth(3, 'exam2.txt')
+	start = time()
+	FP = FPGrowth(813, 'mushroom.dat')
 	freq_items = []
 	FP.mine_tree(set([]), freq_items)
-	FP.print_tree(FP.root)
-	print(freq_items)
-	
+#	FP.print_tree(FP.root)
+	cnt = Counter(len(i) for i in freq_items)
+	print('Spent time: ' + str(time() - start))
+	for i in range(1, 6):
+		print(cnt[i])
