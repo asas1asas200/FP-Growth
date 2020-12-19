@@ -24,48 +24,32 @@ class FPGrowth:
 
 	def __read_data(self, filename):
 		with open(filename, 'r') as file:
-			data = [i.split() for i in file]					# for string data type
-#			data = [list(map(int, i.split())) for i in file]	# for only numeric data type
+			data = {tuple(i.split()):1 for i in file}			# for string data type
+#			data = {tuple(map(int, i.split())):1 for i in file}	# for only numeric data type
 		return data
 
 
 	def __create_header_table(self):
-		def calc_counts():
-			cnt = Counter()
-			for i in self.data:
-				cnt += Counter(i)
-			return cnt.most_common()
-
 		def merge_counts():
-			cnt = {}
+			total = {}
 			for sets, val in self.data.items():
 				for i in sets:
-					if i not in cnt:
-						cnt[i] = 0
-					cnt[i] += val
-			return list(cnt.items())
-	
-		if isinstance(self.data, list):
-			total_counts = calc_counts()
-		else:
-			total_counts = merge_counts()
-		return {name: self.TableItem(cnt) for name, cnt in total_counts if cnt >= self.freq}
+					if i not in total:
+						total[i] = 0
+					total[i] += val
+			return {name: self.TableItem(total[name]) for name in total if total[name] >= self.freq}
+		total_counts = merge_counts()
+		return merge_counts()
 
 	def __sort_filter_data(self):
-		if isinstance(self.data, list):
-			ret = [] 
-			for i in self.data:
-				ret.append(sorted(filter(lambda x: x in self.table, sorted(i)), key=lambda y: self.table[y].cnt, reverse=True))
-			return ret
-		else:
-			ret = {}
-			for i in self.data.items():
-				addon = tuple(sorted(filter(lambda x: x in self.table, sorted(i[0])), key=lambda y: self.table[y].cnt, reverse=True))
-				if addon in ret:
-					ret[addon] += i[1]
-				else:
-					ret[addon] = i[1]
-			return ret
+		ret = {}
+		for i in self.data.items():
+			addon = tuple(sorted(filter(lambda x: x in self.table, sorted(i[0])), key=lambda y: self.table[y].cnt, reverse=True))
+			if addon in ret:
+				ret[addon] += i[1]
+			else:
+				ret[addon] = i[1]
+		return ret
 
 	def __create_FP_tree(self):
 		def travel(items, val=1):
@@ -81,12 +65,8 @@ class FPGrowth:
 			
 
 		self.root = self.Node()
-		if isinstance(self.data, list):
-			for items in self.data:
-				travel(items)
-		else:
-			for items in self.data.items():
-				travel(items[0], items[1])
+		for items in self.data.items():
+			travel(items[0], items[1])
 
 	def is_single_path(self):
 		now = self.root
@@ -115,7 +95,7 @@ class FPGrowth:
 				path = []
 				find_root(i, path)
 				if len(path) > 1:
-					paths[frozenset(path[1:])] = i.value
+					paths[tuple(path[1:])] = i.value
 			return paths
 
 		for i in self.table:
