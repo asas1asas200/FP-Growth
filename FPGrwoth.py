@@ -84,7 +84,6 @@ class FPGrowth:
 			for items in self.data:
 				travel(items)
 		else:
-			print('modified data: ' + str(self.data))
 			for items in self.data.items():
 				travel(items[0], items[1])
 
@@ -111,14 +110,11 @@ class FPGrowth:
 
 		def find_prefix_paths(name):
 			paths = {}
-			print('node<{}> generate path: '.format(name), end='')
 			for i in self.table[name].nodes:
 				path = []
 				find_root(i, path)
 				if len(path) > 1:
 					paths[frozenset(path[1:])] = i.value
-					print(frozenset(path[1:]), i.value, end=', ')
-			print()
 			return paths
 
 		for i in self.table:
@@ -126,26 +122,9 @@ class FPGrowth:
 			new_freq_sets.add(i)
 			freq_sets.append(new_freq_sets)
 			data_lists = find_prefix_paths(i)
-			'''
-			print('data_lists = ', end='')
-			print(data_lists)
-			print('type: {}'.format(type(data_lists)))
-			'''
 			cond_tree = FPGrowth(self.freq, data_lists=data_lists)
-			cond_tree.print_tree(cond_tree.root)
-			print('\n')
-			'''
-			if not cond_tree.is_single_path():
-				print('New Tree:')
-				cond_tree.mine_tree(new_freq_sets, freq_sets)
-				print(':Tree End')
-
-			'''
 			if len(cond_tree.table):
-				print('New Tree:')
 				cond_tree.mine_tree(new_freq_sets, freq_sets)
-				print('Tree end')
-#			'''
 
 if __name__ == '__main__':
 	FP = FPGrowth(3, 'exam2.txt')
