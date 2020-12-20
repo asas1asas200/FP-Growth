@@ -1,9 +1,6 @@
 from collections import Counter
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from threading import Thread
 from itertools import combinations
 from time import time
-
 
 class FPGrowth:
 	class Node:
@@ -33,16 +30,13 @@ class FPGrowth:
 
 
 	def __create_header_table(self):
-		def merge_counts():
-			total = {}
-			for sets, val in self.data.items():
-				for i in sets:
-					if i not in total:
-						total[i] = 0
-					total[i] += val
-			return {name: self.TableItem(total[name]) for name in total if total[name] >= self.freq}
-		total_counts = merge_counts()
-		return merge_counts()
+		total = {}
+		for sets, val in self.data.items():
+			for i in sets:
+				if i not in total:
+					total[i] = 0
+				total[i] += val
+		return {name: self.TableItem(total[name]) for name in total if total[name] >= self.freq}
 
 	def __sort_filter_data(self):
 		ret = {}
@@ -71,12 +65,6 @@ class FPGrowth:
 		for items in self.data.items():
 			travel(items[0], items[1])
 
-	def print_tree(self, node, dep=0):
-		if isinstance(node.name, str): print('\t'*dep + node.name + ':' + str(node.value))
-		for i in node.childs.values():
-			self.print_tree(i, dep+1)
-		
-
 	def mine_tree(self, prefix_paths, freq_sets):
 		def find_root(node, path):
 			if node != self.root:
@@ -100,7 +88,6 @@ class FPGrowth:
 				freq_sets[now] = self.table[i].cnt
 			else:
 				freq_sets[now] += self.table[i].cnt
-#			freq_sets.append(new_freq_sets)
 			data_lists = find_prefix_paths(i)
 			cond_tree = FPGrowth(self.freq, data_lists=data_lists)
 			if len(cond_tree.table):
@@ -140,7 +127,6 @@ if __name__ == '__main__':
 	FP.mine_tree(set([]), freq_items)
 #	FP.print_tree(FP.root)
 	cnt = Counter(len(i) for i in freq_items)
-	rules = set()
 	max_len_sets = filter_sets(sorted(freq_items.keys(), key=lambda x: len(x), reverse=True))
 	rules = find_rules(max_len_sets, 0.8)
 	print('Spent time: ' + str(time() - start))
