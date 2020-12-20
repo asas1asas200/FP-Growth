@@ -1,4 +1,6 @@
 from collections import Counter
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from threading import Thread
 from itertools import combinations
 from time import time
 
@@ -104,6 +106,33 @@ class FPGrowth:
 			if len(cond_tree.table):
 				cond_tree.mine_tree(new_freq_sets, freq_sets)
 
+def find_rules(max_len_sets, conf):
+	rules = set()
+	for freq in max_len_sets:
+		for n in range(2, 6):
+			for r in range(1, n):
+				l = abs(n-r)
+				for i in combinations(freq, l):
+					a = frozenset(i)
+					remain = freq - a
+					for j in combinations(remain, r):
+						b = frozenset(j)
+						if freq_items[a|b] / freq_items[a] >= conf:
+							rules.add((a, b))
+	return rules
+
+def filter_sets(sets):
+	max_len_sets = []
+	for i in sets:
+		flag = True
+		for j in max_len_sets:
+			if i.issubset(j):
+				flag = False
+				break
+		if flag:
+			max_len_sets.append(i)
+	return max_len_sets
+
 if __name__ == '__main__':
 	start = time()
 	FP = FPGrowth(813, 'mushroom.dat')
@@ -111,6 +140,10 @@ if __name__ == '__main__':
 	FP.mine_tree(set([]), freq_items)
 #	FP.print_tree(FP.root)
 	cnt = Counter(len(i) for i in freq_items)
+	rules = set()
+	max_len_sets = filter_sets(sorted(freq_items.keys(), key=lambda x: len(x), reverse=True))
+	rules = find_rules(max_len_sets, 0.8)
 	print('Spent time: ' + str(time() - start))
 	for i in range(1, 6):
 		print(cnt[i])
+	print(len(rules))
