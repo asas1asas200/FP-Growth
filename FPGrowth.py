@@ -2,6 +2,7 @@ from collections import Counter
 from itertools import combinations
 from time import time
 
+
 class FPTree:
 	class Node:
 		def __init__(self, value=0, parent=None, name=None):
@@ -24,10 +25,9 @@ class FPTree:
 
 	def __read_data(self, filename):
 		with open(filename, 'r') as file:
-			data = {tuple(i.split()):1 for i in file}			# for string data type
+			data = {tuple(i.split()): 1 for i in file}			# for string data type
 #			data = {tuple(map(int, i.split())):1 for i in file}	# for only numeric data type
 		return data
-
 
 	def __create_header_table(self):
 		total = {}
@@ -59,11 +59,11 @@ class FPTree:
 					now_node.childs[i] = next_node
 				next_node.value += val
 				now_node = next_node
-			
 
 		self.root = self.Node()
 		for items in self.data.items():
 			travel(items[0], items[1])
+
 
 class FPGrowth(FPTree):
 	def __init__(self, freq, filename=None, data_lists=None):
@@ -108,10 +108,10 @@ class FPGrowth(FPTree):
 						remain = freq - a
 						for j in combinations(remain, r):
 							b = frozenset(j)
-							if self.freq_items[a|b] / self.freq_items[a] >= conf:
+							if self.freq_items[a | b] / self.freq_items[a] >= conf:
 								rules.add((a, b))
 		return rules
-	
+
 	def __filter_sets(self, sets):
 		max_len_sets = []
 		for i in sets:
@@ -127,11 +127,11 @@ class FPGrowth(FPTree):
 	def generate_freq_items(self):
 		self.freq_items = {}
 		self._mine_tree(set([]), self.freq_items)
-	
+
 	def generate_rules(self, conf):
 		self.max_len_sets = self.__filter_sets(sorted(self.freq_items.keys(), key=lambda x: len(x), reverse=True))
 		self.rules = self.__find_rules(conf)
-		
+
 
 if __name__ == '__main__':
 	start = time()
