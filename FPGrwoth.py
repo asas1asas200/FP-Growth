@@ -1,4 +1,5 @@
 from collections import Counter
+from itertools import combinations
 from time import time
 
 
@@ -101,7 +102,12 @@ class FPGrowth:
 		for i in self.table:
 			new_freq_sets = prefix_paths.copy()
 			new_freq_sets.add(i)
-			freq_sets.append(new_freq_sets)
+			now = frozenset(new_freq_sets)
+			if now not in freq_sets:
+				freq_sets[now] = self.table[i].cnt
+			else:
+				freq_sets[now] += self.table[i].cnt
+#			freq_sets.append(new_freq_sets)
 			data_lists = find_prefix_paths(i)
 			cond_tree = FPGrowth(self.freq, data_lists=data_lists)
 			if len(cond_tree.table):
@@ -110,7 +116,7 @@ class FPGrowth:
 if __name__ == '__main__':
 	start = time()
 	FP = FPGrowth(813, 'mushroom.dat')
-	freq_items = []
+	freq_items = {}
 	FP.mine_tree(set([]), freq_items)
 #	FP.print_tree(FP.root)
 	cnt = Counter(len(i) for i in freq_items)
