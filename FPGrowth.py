@@ -2,7 +2,7 @@ from collections import Counter
 from itertools import combinations
 from time import time
 
-class FPGrowth:
+class FPTree:
 	class Node:
 		def __init__(self, value=0, parent=None, name=None):
 			self.childs = {}
@@ -65,7 +65,11 @@ class FPGrowth:
 		for items in self.data.items():
 			travel(items[0], items[1])
 
-	def mine_tree(self, prefix_paths, freq_sets):
+class FPGrowth(FPTree):
+	def __init__(self, freq, filename=None, data_lists=None):
+		super().__init__(freq, filename, data_lists)
+
+	def _mine_tree(self, prefix_paths, freq_sets):
 		def find_root(node, path):
 			if node != self.root:
 				path.append(node.name)
@@ -91,45 +95,51 @@ class FPGrowth:
 			data_lists = find_prefix_paths(i)
 			cond_tree = FPGrowth(self.freq, data_lists=data_lists)
 			if len(cond_tree.table):
-				cond_tree.mine_tree(new_freq_sets, freq_sets)
+				cond_tree._mine_tree(new_freq_sets, freq_sets)
 
-def find_rules(max_len_sets, freq_items, conf):
-	rules = set()
-	for freq in max_len_sets:
-		for n in range(2, 6):
-			for r in range(1, n):
-				l = abs(n-r)
-				for i in combinations(freq, l):
-					a = frozenset(i)
-					remain = freq - a
-					for j in combinations(remain, r):
-						b = frozenset(j)
-						if freq_items[a|b] / freq_items[a] >= conf:
-							rules.add((a, b))
-	return rules
+	def __find_rules(self, conf):
+		rules = set()
+		for freq in self.max_len_sets:
+			for n in range(2, 6):
+				for r in range(1, n):
+					l = abs(n-r)
+					for i in combinations(freq, l):
+						a = frozenset(i)
+						remain = freq - a
+						for j in combinations(remain, r):
+							b = frozenset(j)
+							if self.freq_items[a|b] / self.freq_items[a] >= conf:
+								rules.add((a, b))
+		return rules
+	
+	def __filter_sets(self, sets):
+		max_len_sets = []
+		for i in sets:
+			flag = True
+			for j in max_len_sets:
+				if i.issubset(j):
+					flag = False
+					break
+			if flag:
+				max_len_sets.append(i)
+		return max_len_sets
 
-def filter_sets(sets):
-	max_len_sets = []
-	for i in sets:
-		flag = True
-		for j in max_len_sets:
-			if i.issubset(j):
-				flag = False
-				break
-		if flag:
-			max_len_sets.append(i)
-	return max_len_sets
-
+	def generate_freq_items(self):
+		self.freq_items = {}
+		self._mine_tree(set([]), self.freq_items)
+	
+	def generate_rules(self, conf):
+		self.max_len_sets = self.__filter_sets(sorted(self.freq_items.keys(), key=lambda x: len(x), reverse=True))
+		self.rules = self.__find_rules(conf)
+		
 
 if __name__ == '__main__':
 	start = time()
 	FP = FPGrowth(813, 'mushroom.dat')
-	freq_items = {}
-	FP.mine_tree(set([]), freq_items)
-	cnt = Counter(len(i) for i in freq_items)
-	max_len_sets = filter_sets(sorted(freq_items.keys(), key=lambda x: len(x), reverse=True))
-	rules = find_rules(max_len_sets, freq_items, 0.8)
-	print('Spent time: {}s'.format(time()-start))
+	FP.generate_freq_items()
+	FP.generate_rules(0.8)
+	print('Spent Time: {}s'.format(time()-start))
+	cnt = Counter(len(i) for i in FP.freq_items)
 	for i in range(1, 6):
 		print('|L^{}|={}'.format(i, cnt[i]))
-	print(len(rules))
+	print(len(FP.rules))
