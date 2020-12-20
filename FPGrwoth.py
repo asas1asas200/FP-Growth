@@ -69,15 +69,6 @@ class FPGrowth:
 		for items in self.data.items():
 			travel(items[0], items[1])
 
-	def is_single_path(self):
-		now = self.root
-		while len(now.childs):
-			if len(now.childs) > 1:
-				return False
-			else:
-				now = list(now.childs.values())[0]
-		return True
-
 	def print_tree(self, node, dep=0):
 		if isinstance(node.name, str): print('\t'*dep + node.name + ':' + str(node.value))
 		for i in node.childs.values():
