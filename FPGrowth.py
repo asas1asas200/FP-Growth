@@ -93,7 +93,7 @@ class FPGrowth:
 			if len(cond_tree.table):
 				cond_tree.mine_tree(new_freq_sets, freq_sets)
 
-def find_rules(max_len_sets, conf):
+def find_rules(max_len_sets, freq_items, conf):
 	rules = set()
 	for freq in max_len_sets:
 		for n in range(2, 6):
@@ -120,16 +120,16 @@ def filter_sets(sets):
 			max_len_sets.append(i)
 	return max_len_sets
 
+
 if __name__ == '__main__':
 	start = time()
 	FP = FPGrowth(813, 'mushroom.dat')
 	freq_items = {}
 	FP.mine_tree(set([]), freq_items)
-#	FP.print_tree(FP.root)
 	cnt = Counter(len(i) for i in freq_items)
 	max_len_sets = filter_sets(sorted(freq_items.keys(), key=lambda x: len(x), reverse=True))
-	rules = find_rules(max_len_sets, 0.8)
-	print('Spent time: ' + str(time() - start))
+	rules = find_rules(max_len_sets, freq_items, 0.8)
+	print('Spent time: {}s'.format(time()-start))
 	for i in range(1, 6):
-		print(cnt[i])
+		print('|L^{}|={}'.format(i, cnt[i]))
 	print(len(rules))
